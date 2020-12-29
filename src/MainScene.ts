@@ -1,4 +1,5 @@
-import { Scene, Engine, ArcRotateCamera, Vector3, HemisphericLight, Mesh } from 'babylonjs';
+import { Scene, Engine, ArcRotateCamera, Vector3, HemisphericLight, MeshBuilder, SceneLoader } from 'babylonjs';
+import { circleOfConfusionPixelShader } from 'babylonjs/Shaders/circleOfConfusion.fragment';
 
 export class MainScene {
     private scene: Scene;
@@ -11,23 +12,30 @@ export class MainScene {
             stencil: true
         });
         this.scene = new Scene(this.engine);
-        this.camera = new ArcRotateCamera('camera1', 0, Math.PI / 4, 10, Vector3.Zero(), this.scene);
-        this.camera.attachControl(canvas, false);
-        this.iniScene();
-        this.engine.runRenderLoop(() => {
-            this.scene.render();
-        });
+        this.camera = new ArcRotateCamera('camera1', -Math.PI / 2, Math.PI / 2.5, 3, Vector3.Zero(), this.scene);
+        this.camera.attachControl(canvas, true);
+        this.iniScene()
+            .then((result) => {
 
-        window.addEventListener('resize', () => {
-            this.engine.resize();
-        })
+                console.log('result', result.meshes);
+                result.meshes[1].position.x = 20;
+                const myMesh_1 = this.scene.getMeshByName('detached_house');
+                myMesh_1!.rotation.y = Math.PI / 2;
+
+                this.engine.runRenderLoop(() => {
+                    this.scene.render();
+                });
+
+                window.addEventListener('resize', () => {
+                    this.engine.resize();
+                });
+            });
+
     }
 
     private iniScene() {
         const ligth = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
-        const sphere = Mesh.CreateSphere('sphere1', 16, 2, this.scene, false, Mesh.FRONTSIDE);
-        sphere.position.y = 1;
-
-        const ground = Mesh.CreateGround('ground1', 6, 6, 2, this.scene, false);
+        //const box = MeshBuilder.CreateBox("box", {}, this.scene);
+        return SceneLoader.ImportMeshAsync("", "https://assets.babylonjs.com/meshes/", "both_houses_scene.babylon");
     }
 }
