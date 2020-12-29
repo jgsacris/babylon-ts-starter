@@ -1,4 +1,4 @@
-import { Scene, Engine, ArcRotateCamera, Vector3, HemisphericLight, Mesh } from 'babylonjs';
+import { Scene, Engine, ArcRotateCamera, Vector3, HemisphericLight, Mesh } from '@babylonjs/core';
 
 export class MainScene {
     private scene: Scene;
