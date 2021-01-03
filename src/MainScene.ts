@@ -1,4 +1,5 @@
-import("@babylonjs/inspector");
+import "@babylonjs/inspector";
+import "@babylonjs/loaders";
 import {
     Scene, Engine, ArcRotateCamera, Vector3,
     HemisphericLight, SceneLoader, MeshBuilder, StandardMaterial, Color3, Texture, Vector4, Mesh
@@ -18,7 +19,7 @@ export class MainScene {
             stencil: true
         });
         this.scene = new Scene(this.engine);
-        this.scene.debugLayer.show({ embedMode: true });
+        //this.scene.debugLayer.show({ embedMode: true });
         this.camera = new ArcRotateCamera('camera1', -Math.PI / 2, Math.PI / 2.5, 8, Vector3.Zero(), this.scene);
         this.camera.attachControl(canvas, true);
         this.iniScene()
@@ -50,6 +51,7 @@ export class MainScene {
         car.rotation.x = -Math.PI / 2;
         car.position.z = 0.8;
         car.position.y = 0.2;
+        this.loadDude();
 
     }
 
@@ -160,6 +162,20 @@ export class MainScene {
         roof.position.y = 1.22;
 
         return roof;
+    }
+
+    private loadDude = () => {
+        SceneLoader.ImportMeshAsync("", "./assets/", "knight.glb", this.scene)
+            .then((result) => {
+                console.log('result', result);
+                const dude = result.meshes[0];
+                const scale = 0.0025;
+                dude.scaling = new Vector3(scale, scale, scale);
+                this.scene.beginAnimation(result.skeletons[0], 0, 100, true, 1.0);
+            })
+            .catch(error => {
+                console.warn('error', error)
+            })
     }
 
 }

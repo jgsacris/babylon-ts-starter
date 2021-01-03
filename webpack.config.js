@@ -18,7 +18,7 @@ module.exports = {
                     // disable type checker - we will use it in fork plugin
                     transpileOnly: true
                 }
-            },
+            }
         ],
     },
     resolve: {
