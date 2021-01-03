@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/jgsacris/babylon-ts-starter#readme",
   "devDependencies": {
+    "@babylonjs/inspector": "^4.2.0",
     "@types/earcut": "^2.1.1",
     "copy-webpack-plugin": "^7.0.0",
     "fork-ts-checker-webpack-plugin": "^6.0.8",
