@@ -1,8 +1,9 @@
 import "@babylonjs/inspector";
 import "@babylonjs/loaders";
+import * as GUI from "@babylonjs/gui";
 import {
     Scene, Engine, ArcRotateCamera, Vector3,
-    HemisphericLight, SceneLoader, MeshBuilder, StandardMaterial, Color3, Texture, Vector4, Mesh, CubeTexture
+    HemisphericLight, SceneLoader, MeshBuilder, StandardMaterial, Color3, Texture, Vector4, Mesh, CubeTexture, DirectionalLight, ShadowGenerator
 } from '@babylonjs/core';
 
 
@@ -11,11 +12,13 @@ import { buildGround as buildTextureGround } from './Ground';
 import * as dude from './Dude';
 import { buildWoods, buildUFO } from './Trees';
 import { buildFountain } from './Fountain';
+import { createLamp } from './Lamps';
 
 export class MainScene {
     private scene: Scene;
     private engine: Engine;
     private camera: ArcRotateCamera;
+    private shadowGenerator: ShadowGenerator | null = null;
 
     constructor(canvas: HTMLCanvasElement) {
         this.engine = new Engine(canvas, true, {
@@ -50,7 +53,11 @@ export class MainScene {
     }
 
     private async iniScene() {
-        const ligth = new HemisphericLight('light1', new Vector3(1, 1, 0), this.scene);
+        const light = new DirectionalLight('light1', new Vector3(0, -1, 1), this.scene);
+        light.position = new Vector3(0, 50, -100);
+        light.intensity = 0.1;
+        // Shadow generator
+        this.shadowGenerator = new ShadowGenerator(1024, light);
         this.buildSkybox();
         buildWoods(this.scene);
         this.buildVillage();
@@ -64,8 +71,65 @@ export class MainScene {
         car.position.x = 2;
         car.position.z = 0.8;
         car.position.y = 0.2;
-        this.loadDude();
+        const dude = await this.loadDude();
+        this.shadowGenerator.addShadowCaster(dude, true);
         buildUFO(this.scene);
+        this.buildLights();
+        this.createGUI(light);
+    }
+
+    private createGUI(light: DirectionalLight) {
+        // GUI
+        const adt = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        const panel = new GUI.StackPanel();
+        panel.width = "220px";
+        panel.top = "-25px";
+        panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+        panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+        adt.addControl(panel);
+
+        const header = new GUI.TextBlock();
+        header.text = "Night to Day";
+        header.height = "30px";
+        header.color = "white";
+        panel.addControl(header);
+
+        const slider = new GUI.Slider();
+        slider.minimum = 0;
+        slider.maximum = 1;
+        slider.borderColor = "black";
+        slider.color = "gray";
+        slider.background = "white";
+        slider.value = 1;
+        slider.height = "20px";
+        slider.width = "200px";
+        slider.onValueChangedObservable.add((value: any) => {
+            if (light) {
+                light.intensity = value;
+            }
+        });
+        panel.addControl(slider);
+    }
+
+    private buildLights() {
+        const lamp = createLamp(this.scene);
+        lamp.position = new Vector3(1.5, 0, 3);
+        lamp.rotation = Vector3.Zero();
+        lamp.rotation.y = Math.PI / 8;
+
+        const lamp3 = lamp.clone("lamp3");
+        lamp3.position.z = -8;
+
+        const lamp1 = lamp.clone("lamp1");
+        lamp1.position.x = -8;
+        lamp1.position.z = 1.2;
+        lamp1.rotation.y = Math.PI / 2;
+
+        const lamp2 = lamp1.clone("lamp2");
+        lamp2.position.x = -2.7;
+        lamp2.position.z = 0.2;
+        lamp2.rotation.y = -Math.PI / 2;
 
     }
 
@@ -134,9 +198,11 @@ export class MainScene {
         groundMat.diffuseTexture = new Texture("https://assets.babylonjs.com/environments/villagegreen.png", this.scene);
         groundMat.diffuseTexture.hasAlpha = true;
         ground.material = groundMat;
+        ground.receiveShadows = true;
 
         const txtGround = buildTextureGround(this.scene);
         txtGround.position.y = -0.01;
+
     }
 
     private buildHouse = (width: number) => {
@@ -197,7 +263,7 @@ export class MainScene {
 
     private loadDude = () => {
 
-        dude.loadDude(this.scene);
+        return dude.loadDude(this.scene);
 
     }
 

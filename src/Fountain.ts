@@ -1,5 +1,9 @@
-import { Color4 } from "@babylonjs/core";
+import { AbstractMesh, Color4, PointerEventTypes } from "@babylonjs/core";
 import { Mesh, MeshBuilder, Scene, Vector3, ParticleSystem, Texture } from "@babylonjs/core";
+
+let fountain: Mesh;
+let switched: boolean = false;
+let particleSystem: ParticleSystem;
 
 function buildFountain(scene: Scene): Mesh {
     const fountainProfile = [
@@ -13,14 +17,16 @@ function buildFountain(scene: Scene): Mesh {
         new Vector3(0.15, 0.9, 0)
     ];
 
-    const fountain = MeshBuilder.CreateLathe("fountain",
+    fountain = MeshBuilder.CreateLathe("fountain",
         { shape: fountainProfile, sideOrientation: Mesh.DOUBLESIDE }, scene);
     createParticleSystem(scene);
+    setupIneractions(scene);
     return fountain;
 }
 
+
 function createParticleSystem(scene: Scene) {
-    const particleSystem = new ParticleSystem('particles', 5000, scene);
+    particleSystem = new ParticleSystem('particles', 5000, scene);
     particleSystem.particleTexture = new Texture('assets/textures/flare.png', scene);
     particleSystem.emitter = new Vector3(-4, 0.8, -6); // the point at the top of the fountain
     particleSystem.minEmitBox = new Vector3(-0.01, 0, -0.01); // minimum box dimensions
@@ -54,6 +60,32 @@ function createParticleSystem(scene: Scene) {
     particleSystem.updateSpeed = 0.025;
     particleSystem.gravity = new Vector3(0, -9.81, 0);
     particleSystem.start();
+}
+
+function setupIneractions(scene: Scene) {
+    switched = false;
+    scene.onPointerObservable.add((pointerInfo) => {
+        switch (pointerInfo.type) {
+            case PointerEventTypes.POINTERDOWN:
+                if (pointerInfo?.pickInfo?.hit) {
+                    pointerDown(pointerInfo.pickInfo.pickedMesh!);
+                }
+                break;
+        }
+
+    })
+}
+
+function pointerDown(mesh: AbstractMesh) {
+    if (mesh === fountain) {
+        switched = !switched;
+        if (switched) {
+            particleSystem.start();
+        }
+        else {
+            particleSystem.stop();
+        }
+    }
 }
 
 export {

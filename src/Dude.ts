@@ -7,25 +7,25 @@ let step = 0.012;
 let p = 0;
 let startRotation: Quaternion;
 
-function loadDude(scene: Scene) {
+async function loadDude(scene: Scene): Promise<Mesh> {
     _scene = scene;
-    SceneLoader.ImportMeshAsync("", "./assets/", "knight.glb", scene)
-        .then((result) => {
-            console.log('result', result);
-            _dude = result.meshes[0] as Mesh;
-            const scale = 0.0025;
-            _dude.scaling = new Vector3(scale, scale, scale);
-            scene.beginAnimation(result.skeletons[0], 0, 100, true, 1.0);
-            _dude.position = new Vector3(-6.1, 0, 0.7);
-            _dude.rotate(Axis.Y, Tools.ToRadians(-93), Space.LOCAL);
-            //_dude.getChildTransformNodes()[0].addRotation(0, Math.PI, 0);
-            startRotation = _dude.rotationQuaternion?.clone()!;
-            console.log('startRotation', startRotation);
-            setAnimation();
-        })
-        .catch(error => {
-            console.warn('error', error)
-        })
+    try {
+        const result = await SceneLoader.ImportMeshAsync("", "./assets/", "knight.glb", scene);
+        console.log('result', result);
+        _dude = (result.meshes[0] as Mesh);
+        const scale = 0.0025;
+        _dude.scaling = new Vector3(scale, scale, scale);
+        scene.beginAnimation(result.skeletons[0], 0, 100, true, 1);
+        _dude.position = new Vector3(-6.1, 0, 0.7);
+        _dude.rotate(Axis.Y, Tools.ToRadians(-93), Space.LOCAL);
+        //_dude.getChildTransformNodes()[0].addRotation(0, Math.PI, 0);
+        startRotation = (_dude.rotationQuaternion?.clone()!);
+        console.log('startRotation', startRotation);
+        setAnimation();
+        return _dude;
+    } catch (error) {
+        throw (error);
+    }
 }
 
 
