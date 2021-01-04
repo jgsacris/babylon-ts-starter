@@ -7,6 +7,8 @@ import {
 
 
 import { buildCar, startAnimation as startCarAnimation } from './Car';
+import { buildGround as buildTextureGround } from './Ground';
+import * as dude from './Dude';
 
 export class MainScene {
     private scene: Scene;
@@ -19,7 +21,7 @@ export class MainScene {
             stencil: true
         });
         this.scene = new Scene(this.engine);
-        //this.scene.debugLayer.show({ embedMode: true });
+        this.scene.debugLayer.show({ embedMode: true });
         this.camera = new ArcRotateCamera('camera1', -Math.PI / 2, Math.PI / 2.5, 8, Vector3.Zero(), this.scene);
         this.camera.attachControl(canvas, true);
         this.iniScene()
@@ -46,9 +48,11 @@ export class MainScene {
     private async iniScene() {
         const ligth = new HemisphericLight('light1', new Vector3(1, 1, 0), this.scene);
         this.buildVillage();
-        const car = buildCar(this.scene);
+        const car = await buildCar(this.scene);
         startCarAnimation();
         car.rotation.x = -Math.PI / 2;
+        car.rotation.y = Math.PI / 2;
+        car.position.x = 2;
         car.position.z = 0.8;
         car.position.y = 0.2;
         this.loadDude();
@@ -103,9 +107,15 @@ export class MainScene {
 
     private buildGround() {
         const ground = MeshBuilder.CreateGround('ground', { width: 18, height: 18 });
+        // const groundMat = new StandardMaterial("groundMat", this.scene);
+        // groundMat.diffuseColor = new Color3(0, 1, 0);
         const groundMat = new StandardMaterial("groundMat", this.scene);
-        groundMat.diffuseColor = new Color3(0, 1, 0);
+        groundMat.diffuseTexture = new Texture("https://assets.babylonjs.com/environments/villagegreen.png", this.scene);
+        groundMat.diffuseTexture.hasAlpha = true;
         ground.material = groundMat;
+
+        const txtGround = buildTextureGround(this.scene);
+        txtGround.position.y = -0.01;
     }
 
     private buildHouse = (width: number) => {
@@ -165,17 +175,9 @@ export class MainScene {
     }
 
     private loadDude = () => {
-        SceneLoader.ImportMeshAsync("", "./assets/", "knight.glb", this.scene)
-            .then((result) => {
-                console.log('result', result);
-                const dude = result.meshes[0];
-                const scale = 0.0025;
-                dude.scaling = new Vector3(scale, scale, scale);
-                this.scene.beginAnimation(result.skeletons[0], 0, 100, true, 1.0);
-            })
-            .catch(error => {
-                console.warn('error', error)
-            })
+
+        dude.loadDude(this.scene);
+
     }
 
 }

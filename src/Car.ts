@@ -1,5 +1,6 @@
 import { Vector3, Vector4, StandardMaterial, Texture, MeshBuilder, Mesh, Scene, Animation, CubicEase, EasingFunction } from "@babylonjs/core";
 import earcut from 'earcut';
+import { loadTexturesAsync } from './TextureLoaderHelper';
 
 let car: Mesh;
 let wheelRB: Mesh;
@@ -8,62 +9,70 @@ let wheelLB: Mesh;
 let wheelLF: Mesh;
 let _scene: Scene;
 
-function buildCar(scene: Scene): Mesh {
 
-    _scene = scene;
-    //base
-    const outline = [
-        new Vector3(-0.3, 0, -0.1),
-        new Vector3(0.2, 0, -0.1),
-    ]
 
-    //curved front
-    for (let i = 0; i < 20; i++) {
-        outline.push(new Vector3(0.2 * Math.cos(i * Math.PI / 40), 0, 0.2 * Math.sin(i * Math.PI / 40) - 0.1));
-    }
 
-    //top
-    outline.push(new Vector3(0, 0, 0.1));
-    outline.push(new Vector3(-0.3, 0, 0.1));
+function buildCar(scene: Scene): Promise<Mesh> {
 
-    //face UVs
-    const faceUV = [];
-    faceUV[0] = new Vector4(0, 0.5, 0.38, 1);
-    faceUV[1] = new Vector4(0, 0, 1, 0.5);
-    faceUV[2] = new Vector4(0.38, 1, 0, 0.5);
+    return new Promise(async (resolve, reject) => {
+        _scene = scene;
+        //base
+        const outline = [
+            new Vector3(-0.3, 0, -0.1),
+            new Vector3(0.2, 0, -0.1),
+        ]
 
-    //material
-    const carMat = new StandardMaterial("carMat", scene);
-    carMat.diffuseTexture = new Texture("https://assets.babylonjs.com/environments/car.png", scene);
+        //curved front
+        for (let i = 0; i < 20; i++) {
+            outline.push(new Vector3(0.2 * Math.cos(i * Math.PI / 40), 0, 0.2 * Math.sin(i * Math.PI / 40) - 0.1));
+        }
+        const textures = await loadTexturesAsync(['https://assets.babylonjs.com/environments/car.png',
+            'https://assets.babylonjs.com/environments/wheel.png'], scene);
 
-    car = MeshBuilder.ExtrudePolygon("car", { shape: outline, depth: 0.2, faceUV: faceUV, wrap: true }, scene, earcut);
-    car.material = carMat;
+        //top
+        outline.push(new Vector3(0, 0, 0.1));
+        outline.push(new Vector3(-0.3, 0, 0.1));
 
-    const wheelUV = [];
-    wheelUV[0] = new Vector4(0, 0, 1, 1);
-    wheelUV[1] = new Vector4(0, 0.5, 0, 0.5);
-    wheelUV[2] = new Vector4(0, 0, 1, 1);
+        //face UVs
+        const faceUV = [];
+        faceUV[0] = new Vector4(0, 0.5, 0.38, 1);
+        faceUV[1] = new Vector4(0, 0, 1, 0.5);
+        faceUV[2] = new Vector4(0.38, 1, 0, 0.5);
 
-    //car material
-    const wheelMat = new StandardMaterial("wheelMat", scene);
-    wheelMat.diffuseTexture = new Texture("https://assets.babylonjs.com/environments/wheel.png", scene);
+        //material
+        const carMat = new StandardMaterial("carMat", scene);
+        carMat.diffuseTexture = textures[0];
 
-    wheelRB = MeshBuilder.CreateCylinder("wheelRB", { diameter: 0.125, height: 0.05, faceUV: wheelUV });
-    wheelRB.material = wheelMat;
-    wheelRB.parent = car;
-    wheelRB.position.z = -0.1;
-    wheelRB.position.x = -0.2;
-    wheelRB.position.y = 0.035;
-    wheelRF = wheelRB.clone("wheelRF");
-    wheelRF.position.x = 0.1;
-    wheelLB = wheelRB.clone("wheelLB");
-    wheelLB.position.y = -0.2 - 0.035;
-    wheelLF = wheelRF.clone("wheelLF");
-    wheelLF.position.y = -0.2 - 0.035;
+        car = MeshBuilder.ExtrudePolygon("car", { shape: outline, depth: 0.2, faceUV: faceUV, wrap: true }, scene, earcut);
+        car.material = carMat;
 
-    setAnimations();
+        const wheelUV = [];
+        wheelUV[0] = new Vector4(0, 0, 1, 1);
+        wheelUV[1] = new Vector4(0, 0.5, 0, 0.5);
+        wheelUV[2] = new Vector4(0, 0, 1, 1);
 
-    return car;
+        //car material
+        const wheelMat = new StandardMaterial("wheelMat", scene);
+        wheelMat.diffuseTexture = textures[1];
+
+        wheelRB = MeshBuilder.CreateCylinder("wheelRB", { diameter: 0.125, height: 0.05, faceUV: wheelUV });
+        wheelRB.material = wheelMat;
+        wheelRB.parent = car;
+        wheelRB.position.z = -0.1;
+        wheelRB.position.x = -0.2;
+        wheelRB.position.y = 0.035;
+        wheelRF = wheelRB.clone("wheelRF");
+        wheelRF.position.x = 0.1;
+        wheelLB = wheelRB.clone("wheelLB");
+        wheelLB.position.y = -0.2 - 0.035;
+        wheelLF = wheelRF.clone("wheelLF");
+        wheelLF.position.y = -0.2 - 0.035;
+
+        setAnimations();
+
+        resolve(car);
+    })
+
 }
 
 function setAnimations() {
