@@ -2,13 +2,15 @@ import "@babylonjs/inspector";
 import "@babylonjs/loaders";
 import {
     Scene, Engine, ArcRotateCamera, Vector3,
-    HemisphericLight, SceneLoader, MeshBuilder, StandardMaterial, Color3, Texture, Vector4, Mesh
+    HemisphericLight, SceneLoader, MeshBuilder, StandardMaterial, Color3, Texture, Vector4, Mesh, CubeTexture
 } from '@babylonjs/core';
 
 
 import { buildCar, startAnimation as startCarAnimation } from './Car';
 import { buildGround as buildTextureGround } from './Ground';
 import * as dude from './Dude';
+import { buildWoods, buildUFO } from './Trees';
+import { buildFountain } from './Fountain';
 
 export class MainScene {
     private scene: Scene;
@@ -21,8 +23,10 @@ export class MainScene {
             stencil: true
         });
         this.scene = new Scene(this.engine);
-        this.scene.debugLayer.show({ embedMode: true });
+        //this.scene.debugLayer.show({ embedMode: true });
         this.camera = new ArcRotateCamera('camera1', -Math.PI / 2, Math.PI / 2.5, 8, Vector3.Zero(), this.scene);
+        this.camera.upperBetaLimit = Math.PI / 2.2;
+        this.camera.wheelPrecision = 100;
         this.camera.attachControl(canvas, true);
         this.iniScene()
             .then((result) => {
@@ -47,16 +51,33 @@ export class MainScene {
 
     private async iniScene() {
         const ligth = new HemisphericLight('light1', new Vector3(1, 1, 0), this.scene);
+        this.buildSkybox();
+        buildWoods(this.scene);
         this.buildVillage();
+        const fountain = buildFountain(this.scene);
+        fountain.position.x = -4;
+        fountain.position.z = -6;
         const car = await buildCar(this.scene);
         startCarAnimation();
         car.rotation.x = -Math.PI / 2;
-        car.rotation.y = Math.PI / 2;
+        car.rotation.y = -Math.PI / 2;
         car.position.x = 2;
         car.position.z = 0.8;
         car.position.y = 0.2;
         this.loadDude();
+        buildUFO(this.scene);
 
+    }
+
+    private buildSkybox() {
+        const skybox = MeshBuilder.CreateBox("skyBox", { size: 150 }, this.scene);
+        const skyboxMaterial = new StandardMaterial("skyBox", this.scene);
+        skyboxMaterial.backFaceCulling = false;
+        skyboxMaterial.reflectionTexture = new CubeTexture("assets/textures/skybox", this.scene);
+        skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
+        skyboxMaterial.diffuseColor = new Color3(0, 0, 0);
+        skyboxMaterial.specularColor = new Color3(0, 0, 0);
+        skybox.material = skyboxMaterial;
     }
 
     private buildVillage() {

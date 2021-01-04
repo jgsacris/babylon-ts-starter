@@ -94,7 +94,7 @@ function setAnimations() {
     const ease = new CubicEase();
     ease.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
-    const animCar = new Animation("carAnimation", "position.x", 30,
+    const animCar = new Animation("carAnimation", "position.z", 30,
         Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
     const carKeys = [];
     carKeys.push({
