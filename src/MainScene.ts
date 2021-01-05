@@ -3,7 +3,7 @@ import "@babylonjs/loaders";
 import * as GUI from "@babylonjs/gui";
 import {
     Scene, Engine, ArcRotateCamera, Vector3,
-    HemisphericLight, SceneLoader, MeshBuilder, StandardMaterial, Color3, Texture, Vector4, Mesh, CubeTexture, DirectionalLight, ShadowGenerator
+    HemisphericLight, SceneLoader, MeshBuilder, StandardMaterial, Color3, Texture, Vector4, Mesh, CubeTexture, DirectionalLight, ShadowGenerator, Camera, FollowCamera
 } from '@babylonjs/core';
 
 
@@ -17,7 +17,7 @@ import { createLamp } from './Lamps';
 export class MainScene {
     private scene: Scene;
     private engine: Engine;
-    private camera: ArcRotateCamera;
+    private camera: Camera;
     private shadowGenerator: ShadowGenerator | null = null;
 
     constructor(canvas: HTMLCanvasElement) {
@@ -27,17 +27,11 @@ export class MainScene {
         });
         this.scene = new Scene(this.engine);
         //this.scene.debugLayer.show({ embedMode: true });
-        this.camera = new ArcRotateCamera('camera1', -Math.PI / 2, Math.PI / 2.5, 8, Vector3.Zero(), this.scene);
-        this.camera.upperBetaLimit = Math.PI / 2.2;
-        this.camera.wheelPrecision = 100;
+        this.camera = this.createArcRotateCamera();
+        //this.camera = this.createFollowCamera();
         this.camera.attachControl(canvas, true);
         this.iniScene()
             .then((result) => {
-
-                // console.log('result', result.meshes);
-                // result.meshes[1].position.x = 20;
-                // const myMesh_1 = this.scene.getMeshByName('detached_house');
-                // myMesh_1!.rotation.y = Math.PI / 2;
 
                 this.engine.runRenderLoop(() => {
                     this.scene.render();
@@ -50,6 +44,24 @@ export class MainScene {
 
             });
 
+    }
+
+    private createArcRotateCamera(): Camera {
+        const camera = new ArcRotateCamera('camera1', -Math.PI / 2, Math.PI / 2.5, 10, Vector3.Zero(), this.scene);
+        camera.upperBetaLimit = Math.PI / 2.2;
+        camera.wheelPrecision = 100; // higher = more precision
+
+        return camera;
+    }
+
+    private createFollowCamera() {
+        const camera = new FollowCamera('followCamera', new Vector3(-10, 0, -10), this.scene);
+        camera.heightOffset = 4;
+        camera.radius = 0.8;
+        camera.rotationOffset = 0;
+        camera.cameraAcceleration = 0.005;
+        camera.maxCameraSpeed = 10;
+        return camera;
     }
 
     private async iniScene() {
@@ -73,6 +85,10 @@ export class MainScene {
         car.position.y = 0.2;
         const dude = await this.loadDude();
         this.shadowGenerator.addShadowCaster(dude, true);
+        //this.camera.parent = dude; in case we want the ArcRotateCamera to follow the dude;
+        if (this.camera instanceof FollowCamera) {
+            (this.camera as FollowCamera).lockedTarget = dude;
+        }
         buildUFO(this.scene);
         this.buildLights();
         this.createGUI(light);

@@ -18,7 +18,6 @@ async function loadDude(scene: Scene): Promise<Mesh> {
         scene.beginAnimation(result.skeletons[0], 0, 100, true, 1);
         _dude.position = new Vector3(-6.1, 0, 0.7);
         _dude.rotate(Axis.Y, Tools.ToRadians(-93), Space.LOCAL);
-        //_dude.getChildTransformNodes()[0].addRotation(0, Math.PI, 0);
         startRotation = (_dude.rotationQuaternion?.clone()!);
         console.log('startRotation', startRotation);
         setAnimation();
