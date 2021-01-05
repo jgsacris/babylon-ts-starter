@@ -1,3 +1,6 @@
+import "@babylonjs/inspector";
+import "@babylonjs/loaders";
+import * as GUI from "@babylonjs/gui";
 import { Scene, Engine, ArcRotateCamera, Vector3, HemisphericLight, Mesh } from '@babylonjs/core';
 
 export class MainScene {
@@ -11,6 +14,7 @@ export class MainScene {
             stencil: true
         });
         this.scene = new Scene(this.engine);
+        //this.scene.debugLayer.show({ embedMode: true }); // shows inspector
         this.camera = new ArcRotateCamera('camera1', 0, Math.PI / 4, 10, Vector3.Zero(), this.scene);
         this.camera.attachControl(canvas, false);
         this.iniScene();
