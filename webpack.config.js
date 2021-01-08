@@ -2,7 +2,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const path = require('path');
 const fs = require('fs');
-const localIP = '192.168.178.38'
+const localIP = '192.168.178.39'
 
 module.exports = {
     entry: './src/index.ts',
