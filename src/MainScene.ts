@@ -3,7 +3,7 @@ import "@babylonjs/loaders";
 import * as GUI from "@babylonjs/gui";
 import { Scene, Engine, ArcRotateCamera, Vector3, HemisphericLight, Mesh, FreeCamera, WebXRHitTest, MeshBuilder, Quaternion, AbstractMesh, PointerInfo, PointerEventTypes } from '@babylonjs/core';
 import { loadModel } from "./Model";
-import { createRefeshBtn } from "./Refresh";
+import { createRefeshBtn, RefreshButton } from "./Refresh";
 
 export class MainScene {
     private scene: Scene;
@@ -12,7 +12,7 @@ export class MainScene {
     private actor: Mesh | undefined;
     private marker: Mesh | undefined;
     private xrTest: WebXRHitTest | undefined;
-    private refreshBtn: HTMLButtonElement;
+    private refreshBtn!: RefreshButton;
 
 
     constructor(canvas: HTMLCanvasElement) {
@@ -87,16 +87,17 @@ export class MainScene {
     }
 
     private addRefreshBtn() {
-        this.refreshBtn = createRefeshBtn();
-        this.refreshBtn.addEventListener('click', () => {
-            this.repositionObject();
+        this.refreshBtn = new RefreshButton();
+        this.refreshBtn.onClick(() => {
+            console.log('gui pressed');
+            this.marker!.isVisible = true;
+            this.actor!.setEnabled(false);
+            this.xrTest!.paused = false;
+            this.refreshBtn.hide();
         });
-
+        this.refreshBtn.hide();
     }
 
-    private repositionObject() {
-
-    }
 
     private onPointerDown(mesh: AbstractMesh) {
         console.log('mesh hit', this.marker);
@@ -105,6 +106,7 @@ export class MainScene {
         this.marker!.isVisible = false;
         this.actor!.setEnabled(true);
         this.xrTest!.paused = true;
+        this.refreshBtn.show();
     }
 
     private setupInteraction() {
