@@ -1,6 +1,5 @@
 import "@babylonjs/inspector";
 import "@babylonjs/loaders";
-import * as GUI from '@babylonjs/gui';
 import { Scene, Engine, Vector3, HemisphericLight, Mesh, FreeCamera, WebXRHitTest, MeshBuilder, Quaternion, AbstractMesh, PointerInfo, PointerEventTypes } from '@babylonjs/core';
 import { loadModel } from "./Model";
 import { RefreshButton } from "./Refresh";

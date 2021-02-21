@@ -1,9 +1,8 @@
 import "@babylonjs/inspector";
 import "@babylonjs/loaders";
-import * as GUI from "@babylonjs/gui";
-import { Scene, Engine, ArcRotateCamera, Vector3, HemisphericLight, Mesh, FreeCamera, WebXRHitTest, MeshBuilder, Quaternion, AbstractMesh, PointerInfo, PointerEventTypes } from '@babylonjs/core';
+import { Scene, Engine, Vector3, HemisphericLight, Mesh, FreeCamera, WebXRHitTest, MeshBuilder, Quaternion, AbstractMesh, PointerInfo, PointerEventTypes } from '@babylonjs/core';
 import { loadModel } from "./Model";
-import { createRefeshBtn, RefreshButton } from "./Refresh";
+import { RefreshButton } from "./Refresh";
 
 export class MainScene {
     private scene: Scene;
