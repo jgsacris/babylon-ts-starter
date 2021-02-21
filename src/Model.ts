@@ -5,7 +5,7 @@ import { SceneLoader, Mesh, Vector3, Scene, TransformNode } from '@babylonjs/cor
 export async function loadModel(scene: Scene): Promise<Mesh> {
 
     return SceneLoader.ImportMeshAsync('',
-        './assets/stormtrupper.glb')
+        './assets/actor.glb')
         .then((result) => {
             const container = new TransformNode('container', scene);
             const mesh = result.meshes[0];
